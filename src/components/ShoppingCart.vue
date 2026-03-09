@@ -2,14 +2,16 @@
     <div>
         <CartTitle :username="username"></CartTitle>
         <div class="cart-container">
-            <CartList class="cart-list" :cart-items="shoppingCartItems"></CartList>
+            <CartList class="cart-list" :cart-items="shoppingCartItems"
+            @item-remove="removeItem($event)"
+            @quantity-update="updateQuantity($event)"></CartList>
             <OrderSummary class="order-summary" :cart-items="shoppingCartItems" ></OrderSummary>
         </div>
     </div>
 </template>
 
 <script setup>
-import {ref } from 'vue'
+import {ref, watch } from 'vue'
 import CartTitle from './CartTitle.vue';
 import CartList from './CartList.vue';
 import OrderSummary from './OrderSummary.vue';
@@ -57,6 +59,31 @@ let shoppingCartItems = ref([
     image: 'src/assets/img/Nimbus2000.jpg'
   }
 ])
+
+function removeItem(id) {
+  let index = shoppingCartItems.value.findIndex((item) => item.id == id)
+  shoppingCartItems.value.splice(index, 1)
+}
+
+function updateQuantity(val) {
+  const { id, newQuantity } = val
+  shoppingCartItems.value.some((item) => {
+    if (item.id == id) {
+      item.quantity = parseInt(newQuantity)
+      return true
+    }
+  })
+}
+watch(
+  shoppingCartItems,
+  () => {
+    localStorage.setItem(
+      'hogwartsShoppingCart',
+      JSON.stringify(shoppingCartItems.value)
+    )
+  },
+  { deep: true }
+)
 </script>
 
 <style scoped>
